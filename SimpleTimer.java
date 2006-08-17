@@ -109,7 +109,7 @@ public class SimpleTimer extends JFrame {
 				long secondsLeft = (endTime-currentTime-1)/1000 + 1;
 				if(secondsLeft != oldSecondsLeft) {
 				    setTitle("SimpleTimer (" + secondsLeft + " seconds left)");
-				    statusLabel.setText("SimpleTimer (" + secondsLeft + " seconds left)");
+				    statusLabel.setText("SimpleTimer (" + secondsToHMSString(secondsLeft) + " left)");
 				    oldSecondsLeft = secondsLeft;
 				}
 				try { thisObject.wait(100); }
@@ -148,6 +148,19 @@ public class SimpleTimer extends JFrame {
 	    statusLabel.setText("Timer stopped");
 	}
     }
+    
+    private static String secondsToHMSString(long seconds) {
+	long minutes = seconds / 60;
+	long hours = minutes / 60;
+	minutes -= hours*60;
+	seconds -= (hours*60*60 + minutes*60);
+	String result;
+	if(hours > 0) result = hours + "h " +  minutes + "m " + seconds + "s";
+	else if(minutes > 0) result = minutes + "m " + seconds + "s";
+	else result = seconds + "s";
+	return result;
+    }
+    
     public static void main(String[] args) {
        	try {
 	    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
