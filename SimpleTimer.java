@@ -106,25 +106,37 @@ public class SimpleTimer extends JFrame {
 			long oldSecondsLeft = -1;
 			synchronized(thisObject) {
 			    while(currentTime < endTime && !cancel) {
-				long secondsLeft = (endTime-currentTime-1)/1000 + 1;
+				final long secondsLeft = (endTime-currentTime-1)/1000 + 1;
 				if(secondsLeft != oldSecondsLeft) {
-				    setTitle("SimpleTimer (" + secondsLeft + " seconds left)");
-				    statusLabel.setText("SimpleTimer (" + secondsToHMSString(secondsLeft) + " left)");
+				    SwingUtilities.invokeLater(new Runnable() {
+					    public void run() {
+						setTitle("SimpleTimer (" + secondsLeft + " seconds left)");
+						statusLabel.setText("SimpleTimer (" + secondsToHMSString(secondsLeft) + " seconds left)");
+					    }});
 				    oldSecondsLeft = secondsLeft;
 				}
 				try { thisObject.wait(100); }
 				catch(Exception e) {}
 				currentTime = System.currentTimeMillis();
 			    }
-			    setTitle("SimpleTimer");
+			    SwingUtilities.invokeLater(new Runnable() {
+				    public void run() {
+					setTitle("SimpleTimer");
+				    }});
 			    if(!cancel) {
-				statusLabel.setText("Timed out. Waiting for user to confirm...");
-				startStopConfirmButton.setText("Confirm");
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+					    statusLabel.setText("Timed out. Waiting for user to confirm...");
+					    startStopConfirmButton.setText("Confirm");
+					}
+				    });
 				short count = 0;
 				while(!cancel) {
 				    Toolkit.getDefaultToolkit().beep();
 				    try { thisObject.wait((count%3!=1)?500:250); }
-				    catch(Exception e) {}
+				    catch(InterruptedException e) {
+					e.printStackTrace();
+				    }
 				    ++count;
 				}
 			    }
