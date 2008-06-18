@@ -1,0 +1,2 @@
+Main-Class: org.catacombae.simpletimer.SimpleTimer
+Class-Path: swing-layout-1.0.3.jar

@@ -1,3 +1,3 @@
 @echo off
-make
+ant
 pause

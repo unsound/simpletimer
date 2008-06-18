@@ -1,1 +1,3 @@
-@java.exe -cp . SimpleTimer
+@echo off
+call "%~dp0\run.bat"
+pause

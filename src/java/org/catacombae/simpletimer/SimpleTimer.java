@@ -1,10 +1,15 @@
+package org.catacombae.simpletimer;
+
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.SwingUtilities;
 
 public class SimpleTimer extends JFrame {
     private boolean cancel, startMode;
+    private SimpleTimerPanel mainPanel;
+    /*
     private JPanel backgroundPanel;
     private JPanel northPanel;
     private JPanel middlePanel;
@@ -17,6 +22,7 @@ public class SimpleTimer extends JFrame {
     private JTextField minutesField;
     private JTextField secondsField;
     private JButton startStopConfirmButton;
+    */
     //private JButton cancelButton;
     
     public SimpleTimer() {
@@ -24,6 +30,9 @@ public class SimpleTimer extends JFrame {
 	cancel = false;
 	startMode = true;
 
+        mainPanel = new SimpleTimerPanel();
+        
+        /*
 	backgroundPanel = new JPanel();
 	northPanel = new JPanel();
 	middlePanel = new JPanel();
@@ -45,13 +54,15 @@ public class SimpleTimer extends JFrame {
 	hoursField.setText("0");
 	minutesField.setText("0");
 	secondsField.setText("0");
-	
-	startStopConfirmButton.addActionListener(new ActionListener() {
+	*/
+	mainPanel.addControlButtonListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		    startStopConfirmButtonActionPerformed();
 		}
 	    });
-	/*
+        
+	
+        /*
 	cancelButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		    cancel = true;
@@ -61,6 +72,7 @@ public class SimpleTimer extends JFrame {
 	    });
 	*/
 	
+        /*
 	northPanel.add(hoursLabel);
 	northPanel.add(hoursField);
 	northPanel.add(minutesLabel);
@@ -76,30 +88,61 @@ public class SimpleTimer extends JFrame {
 	backgroundPanel.add(middlePanel, BorderLayout.NORTH);
 	backgroundPanel.add(northPanel, BorderLayout.CENTER);
 	backgroundPanel.add(southPanel, BorderLayout.SOUTH);
+        */
+	
+	setupMenus();
 	
 	setDefaultCloseOperation(EXIT_ON_CLOSE);
-	getContentPane().add(backgroundPanel);
+	getContentPane().add(mainPanel);
 	pack();
 	setLocationRelativeTo(null);
     }
-
-    public void setAllEnabled(boolean b) {
-	hoursField.setEnabled(b);
-	minutesField.setEnabled(b);
-	secondsField.setEnabled(b);
-	//startStopConfirmButton.setEnabled(b);
-	//cancelButton.setEnabled(b);
+    
+    public void setupMenus() {
+	JRadioButtonMenuItem traditionalOption = new JRadioButtonMenuItem("Traditional");
+	traditionalOption.setSelected(true);
+	traditionalOption.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		    System.err.println("Traditional");
+		}
+	    });
+	JRadioButtonMenuItem fixedTimeOption = new JRadioButtonMenuItem("Fixed time");
+	fixedTimeOption.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		    System.err.println("Fixed time");
+		}
+	    });
+	//JRadioButtonMenuItem ption = new JRadioButtonMenuItem("Traditional");
+	
+	ButtonGroup styleOptionGroup = new ButtonGroup();
+	styleOptionGroup.add(traditionalOption);
+	styleOptionGroup.add(fixedTimeOption);
+	
+	JMenu optionsMenu = new JMenu("Options");
+	optionsMenu.add(traditionalOption);
+	optionsMenu.add(fixedTimeOption);
+	JMenuBar menuBar = new JMenuBar();
+	menuBar.add(optionsMenu);
+	setJMenuBar(menuBar);
+	
     }
+    
+    public void setAllEnabled(boolean b) {
+	mainPanel.setHoursFieldEnabled(b);
+	mainPanel.setMinutesFieldEnabled(b);
+	mainPanel.setSecondsFieldEnabled(b);
+    }
+    
     public void startStopConfirmButtonActionPerformed() {
 	final SimpleTimer thisObject = this;
 	if(startMode) {
 	    startMode = false;
-	    startStopConfirmButton.setText("Stop");
+	    mainPanel.setControlButtonText("Stop");
 	    setAllEnabled(false);
 	    final long startTime = System.currentTimeMillis();
-	    final long endTime = startTime + 1000*(Integer.parseInt(hoursField.getText())*3600 + 
-						   Integer.parseInt(minutesField.getText())*60 + 
-						   Integer.parseInt(secondsField.getText()));
+	    final long endTime = startTime + 1000*(Integer.parseInt(mainPanel.getHoursFieldText())*3600 + 
+						   Integer.parseInt(mainPanel.getMinutesFieldText())*60 + 
+						   Integer.parseInt(mainPanel.getSecondsFieldText()));
 	    SwingWorker sw = new SwingWorker() {
 		    public Object construct() {
 			long currentTime = startTime;
@@ -111,7 +154,7 @@ public class SimpleTimer extends JFrame {
 				    SwingUtilities.invokeLater(new Runnable() {
 					    public void run() {
 						setTitle("SimpleTimer (" + secondsLeft + " seconds left)");
-						statusLabel.setText("SimpleTimer (" + secondsToHMSString(secondsLeft) + " seconds left)");
+						mainPanel.setStatusLabelText("SimpleTimer (" + secondsToHMSString(secondsLeft) + " seconds left)");
 					    }});
 				    oldSecondsLeft = secondsLeft;
 				}
@@ -126,8 +169,8 @@ public class SimpleTimer extends JFrame {
 			    if(!cancel) {
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
-					    statusLabel.setText("Timed out. Waiting for user to confirm...");
-					    startStopConfirmButton.setText("Confirm");
+					    mainPanel.setStatusLabelText("Timed out. Waiting for user to confirm...");
+					    mainPanel.setControlButtonText("Confirm");
 					}
 				    });
 				short count = 0;
@@ -151,13 +194,13 @@ public class SimpleTimer extends JFrame {
 	}
 	else {
 	    startMode = true;
-	    startStopConfirmButton.setText("Start");
+	    mainPanel.setControlButtonText("Start");
 	    synchronized(thisObject) {
 		cancel = true;
 		thisObject.notifyAll();
 	    }
 	    setAllEnabled(true);
-	    statusLabel.setText("Timer stopped");
+	    mainPanel.setStatusLabelText("Timer stopped");
 	}
     }
     

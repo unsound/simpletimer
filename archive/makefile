@@ -1,7 +1,7 @@
 CC = javac              # kompilator
 FLAGS = #-source 1.4      # flaggor
 SRCFILES = *.java
-RM = del
+RM = rm
 RMFILES = *.class
 
 simpletimer: 
