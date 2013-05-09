@@ -10,7 +10,7 @@
     <property name="outjar.filename" value="simpletimer.jar"/>
     <path id="build.classpath">
         <pathelement location="${builddir}"/>
-        <pathelement location="${libdir}/swing-layout-1.0.3.jar"/>
+        <pathelement location="${libdir}/swing-layout-1.0.4.jar"/>
     </path>
     <target name="all" depends="cleanall,jar"/>
     <target name="init">
