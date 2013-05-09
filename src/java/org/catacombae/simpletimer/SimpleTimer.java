@@ -59,7 +59,7 @@ public class SimpleTimer extends JFrame {
 	optionsMenu.add(traditionalOption);
 	optionsMenu.add(fixedTimeOption);
 	JMenuBar menuBar = new JMenuBar();
-	menuBar.add(optionsMenu);
+        //menuBar.add(optionsMenu);
 	setJMenuBar(menuBar);
     }
 
