@@ -13,21 +13,6 @@ import javax.swing.SwingUtilities;
 public class SimpleTimer extends JFrame {
     private boolean cancel, startMode;
     private SimpleTimerPanel mainPanel;
-    /*
-    private JPanel backgroundPanel;
-    private JPanel northPanel;
-    private JPanel middlePanel;
-    private JPanel southPanel;
-    private JLabel statusLabel;
-    private JLabel hoursLabel;
-    private JLabel minutesLabel;
-    private JLabel secondsLabel;
-    private JTextField hoursField;
-    private JTextField minutesField;
-    private JTextField secondsField;
-    private JButton startStopConfirmButton;
-    */
-    //private JButton cancelButton;
     
     public SimpleTimer() {
 	super("SimpleTimer");
@@ -36,63 +21,11 @@ public class SimpleTimer extends JFrame {
 
         mainPanel = new SimpleTimerPanel();
         
-        /*
-	backgroundPanel = new JPanel();
-	northPanel = new JPanel();
-	middlePanel = new JPanel();
-	southPanel = new JPanel();
-	statusLabel = new JLabel("Timer stopped");
-	hoursLabel = new JLabel("Hours:");
-	minutesLabel = new JLabel("Minutes:");
-	secondsLabel = new JLabel("Seconds:");
-	hoursField = new JTextField(3);
-	minutesField = new JTextField(2);
-	secondsField = new JTextField(2);
-	startStopConfirmButton = new JButton("Start");
-	//cancelButton = new JButton("Cancel");
-	
-	backgroundPanel.setLayout(new BorderLayout());
-	backgroundPanel.setBorder(new javax.swing.border.EmptyBorder(5, 5, 5, 5));
-	northPanel.setLayout(new FlowLayout());
-	southPanel.setLayout(new FlowLayout());
-	hoursField.setText("0");
-	minutesField.setText("0");
-	secondsField.setText("0");
-	*/
 	mainPanel.addControlButtonListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		    startStopConfirmButtonActionPerformed();
 		}
 	    });
-        
-	
-        /*
-	cancelButton.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-		    cancel = true;
-		    setAllEnabled(true);
-		    statusLabel.setText("Timer stopped");
-		}
-	    });
-	*/
-	
-        /*
-	northPanel.add(hoursLabel);
-	northPanel.add(hoursField);
-	northPanel.add(minutesLabel);
-	northPanel.add(minutesField);
-	northPanel.add(secondsLabel);
-	northPanel.add(secondsField);
-	
-	middlePanel.add(statusLabel);
-	
-	southPanel.add(startStopConfirmButton);
-	//southPanel.add(cancelButton);
-	
-	backgroundPanel.add(middlePanel, BorderLayout.NORTH);
-	backgroundPanel.add(northPanel, BorderLayout.CENTER);
-	backgroundPanel.add(southPanel, BorderLayout.SOUTH);
-        */
 	
 	setupMenus();
 	
