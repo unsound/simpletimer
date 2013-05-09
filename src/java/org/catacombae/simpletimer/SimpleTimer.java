@@ -9,26 +9,19 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 public class SimpleTimer extends JFrame {
-    private boolean cancel, startMode;
-    private SimpleTimerPanel mainPanel;
+    private JPanel mainPanel;
+    private StoppableController curController = null;
 
     public SimpleTimer() {
 	super("SimpleTimer");
-	cancel = false;
-	startMode = true;
 
-        mainPanel = new SimpleTimerPanel();
-
-	mainPanel.addControlButtonListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-		    startStopConfirmButtonActionPerformed();
-		}
-	    });
+        mainPanel = createNewSimpleTimerPanel();
 
 	setupMenus();
 
@@ -36,6 +29,38 @@ public class SimpleTimer extends JFrame {
 	getContentPane().add(mainPanel);
 	pack();
 	setLocationRelativeTo(null);
+    }
+
+    private SimpleTimerPanel createNewSimpleTimerPanel() {
+        SimpleTimerPanel p;
+
+        if(curController != null) {
+            curController.stop();
+        }
+
+        SimpleTimerController simpleTimerController =
+                new SimpleTimerController();
+        p = new SimpleTimerPanel(simpleTimerController);
+
+        curController = simpleTimerController;
+
+        return p;
+    }
+
+    private SimpleStopwatchPanel createNewSimpleStopwatchPanel() {
+        SimpleStopwatchPanel p;
+
+        if(curController != null) {
+            curController.stop();
+        }
+
+        SimpleStopwatchController simpleStopwatchController =
+                new SimpleStopwatchController();
+        p = new SimpleStopwatchPanel(simpleStopwatchController);
+
+        curController = simpleStopwatchController;
+
+        return p;
     }
 
     private void setupMenus() {
@@ -63,109 +88,320 @@ public class SimpleTimer extends JFrame {
 
         fileMenu.add(closeWindowMenuItem);
 
-	JRadioButtonMenuItem traditionalOption = new JRadioButtonMenuItem("Traditional");
-	traditionalOption.setSelected(true);
-	traditionalOption.addActionListener(new ActionListener() {
+        JRadioButtonMenuItem timerOption = new JRadioButtonMenuItem("Timer");
+        timerOption.setSelected(true);
+        timerOption.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-		    System.err.println("Traditional");
+                    if(!(mainPanel instanceof SimpleTimerPanel)) {
+                        System.err.println("Switching to timer...");
+                        mainPanel = createNewSimpleTimerPanel();
+                        /* Stop whatever the other guy is doing... */
+                        getContentPane().removeAll();
+                        getContentPane().add(mainPanel);
+                        pack();
+                    }
 		}
 	    });
-	JRadioButtonMenuItem fixedTimeOption = new JRadioButtonMenuItem("Fixed time");
-	fixedTimeOption.addActionListener(new ActionListener() {
+        timerOption.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
+        JRadioButtonMenuItem stopwatchOption =
+                new JRadioButtonMenuItem("Stopwatch");
+        stopwatchOption.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-		    System.err.println("Fixed time");
+                    if(!(mainPanel instanceof SimpleStopwatchPanel)) {
+                        System.err.println("Switching to stopwatch...");
+                        mainPanel = createNewSimpleStopwatchPanel();
+                        /* Stop whatever the other guy is doing... */
+                        getContentPane().removeAll();
+                        getContentPane().add(mainPanel);
+                        pack();
+                    }
 		}
 	    });
-	//JRadioButtonMenuItem ption = new JRadioButtonMenuItem("Traditional");
+        stopwatchOption.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 	ButtonGroup styleOptionGroup = new ButtonGroup();
-	styleOptionGroup.add(traditionalOption);
-	styleOptionGroup.add(fixedTimeOption);
+        styleOptionGroup.add(timerOption);
+        styleOptionGroup.add(stopwatchOption);
 
 	JMenu optionsMenu = new JMenu("Options");
-	optionsMenu.add(traditionalOption);
-	optionsMenu.add(fixedTimeOption);
+        optionsMenu.add(timerOption);
+        optionsMenu.add(stopwatchOption);
+
 	JMenuBar menuBar = new JMenuBar();
         menuBar.add(fileMenu);
-        //menuBar.add(optionsMenu);
+        menuBar.add(optionsMenu);
 	setJMenuBar(menuBar);
     }
 
-    public void setAllEnabled(boolean b) {
-	mainPanel.setHoursFieldEnabled(b);
-	mainPanel.setMinutesFieldEnabled(b);
-	mainPanel.setSecondsFieldEnabled(b);
+    private static interface StoppableController {
+        public void stop();
+    };
+
+    private class SimpleTimerController
+            implements SimpleTimerPanel.Controller, StoppableController
+    {
+        private boolean cancel;
+        private boolean startMode;
+
+        public SimpleTimerController() {
+            cancel = false;
+            startMode = true;
+        }
+
+        public void setAllEnabled(SimpleTimerPanel p, boolean b) {
+            p.setHoursFieldEnabled(b);
+            p.setMinutesFieldEnabled(b);
+            p.setSecondsFieldEnabled(b);
+        }
+
+        public void startStopConfirmButtonActionPerformed(
+                final SimpleTimerPanel p)
+        {
+            final Object syncObject = this;
+            final boolean isStart;
+
+            synchronized(syncObject) {
+                if(startMode) {
+                    isStart = true;
+                    startMode = false;
+                }
+                else {
+                    isStart = false;
+                }
+            }
+
+            if(isStart) {
+                p.setControlButtonText("Stop");
+                setAllEnabled(p, false);
+                final long startTime = System.currentTimeMillis();
+                final long endTime = startTime + 1000 * (
+                        Integer.parseInt(p.getHoursFieldText()) * 3600 +
+                        Integer.parseInt(p.getMinutesFieldText()) * 60 +
+                        Integer.parseInt(p.getSecondsFieldText()));
+                SwingWorker sw = new SwingWorker() {
+                    private void reportTime(long secondsLeft) {
+                        setTitle("SimpleTimer (" + secondsLeft + " seconds " +
+                                "left)");
+                        p.setStatusLabelText("SimpleTimer (" +
+                                secondsToHMSString(secondsLeft) + " seconds " +
+                                "left)");
+                    }
+
+                    public Object construct() {
+                        long currentTime = startTime;
+                        long oldSecondsLeft = -1;
+                        synchronized(syncObject) {
+                            while(currentTime < endTime && !cancel) {
+                                final long secondsLeft =
+                                        (endTime-currentTime-1)/1000 + 1;
+                                if(secondsLeft != oldSecondsLeft) {
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                        public void run() {
+                                            reportTime(secondsLeft);
+                                        }
+                                    });
+                                    oldSecondsLeft = secondsLeft;
+                                }
+                                try { syncObject.wait(100); }
+                                catch(Exception e) {}
+                                currentTime = System.currentTimeMillis();
+                            }
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    setTitle("SimpleTimer");
+                                }
+                            });
+                            if(!cancel) {
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    public void run() {
+                                        p.setStatusLabelText("Timed out. " +
+                                                "Waiting for user to " +
+                                                "confirm...");
+                                        p.setControlButtonText("Confirm");
+                                    }
+                                });
+                                short count = 0;
+                                while(!cancel) {
+                                    Toolkit.getDefaultToolkit().beep();
+                                    try {
+                                        final long waitInterval =
+                                                ((count % 3) != 1) ? 500 : 250;
+                                        syncObject.wait(waitInterval);
+                                    }
+                                    catch(InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    ++count;
+                                }
+                            }
+
+                            p.setControlButtonText("Start");
+                            setAllEnabled(p, true);
+                            p.setStatusLabelText("Timer stopped");
+                            startMode = true;
+
+                            cancel = false;
+                            syncObject.notifyAll();
+                        }
+                        //setAllEnabled(true);
+                        return null;
+                    }
+                };
+                sw.start();
+                //setAllEnabled(true);
+            }
+            else {
+                stop();
+            }
+        }
+
+        public void stop() {
+            Object syncObject = this;
+
+            synchronized(syncObject) {
+                if(!startMode) {
+                    cancel = true;
+                    syncObject.notifyAll();
+
+                    while(cancel) {
+                        try {
+                            syncObject.wait();
+                        }
+                        catch(InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    public void startStopConfirmButtonActionPerformed() {
-	final SimpleTimer thisObject = this;
-	if(startMode) {
-	    startMode = false;
-	    mainPanel.setControlButtonText("Stop");
-	    setAllEnabled(false);
-	    final long startTime = System.currentTimeMillis();
-	    final long endTime = startTime + 1000*(Integer.parseInt(mainPanel.getHoursFieldText())*3600 + 
-						   Integer.parseInt(mainPanel.getMinutesFieldText())*60 + 
-						   Integer.parseInt(mainPanel.getSecondsFieldText()));
-	    SwingWorker sw = new SwingWorker() {
-		    public Object construct() {
-			long currentTime = startTime;
-			long oldSecondsLeft = -1;
-			synchronized(thisObject) {
-			    while(currentTime < endTime && !cancel) {
-				final long secondsLeft = (endTime-currentTime-1)/1000 + 1;
-				if(secondsLeft != oldSecondsLeft) {
-				    SwingUtilities.invokeLater(new Runnable() {
-					    public void run() {
-						setTitle("SimpleTimer (" + secondsLeft + " seconds left)");
-						mainPanel.setStatusLabelText("SimpleTimer (" + secondsToHMSString(secondsLeft) + " seconds left)");
-					    }});
-				    oldSecondsLeft = secondsLeft;
-				}
-				try { thisObject.wait(100); }
-				catch(Exception e) {}
-				currentTime = System.currentTimeMillis();
-			    }
-			    SwingUtilities.invokeLater(new Runnable() {
-				    public void run() {
-					setTitle("SimpleTimer");
-				    }});
-			    if(!cancel) {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-					    mainPanel.setStatusLabelText("Timed out. Waiting for user to confirm...");
-					    mainPanel.setControlButtonText("Confirm");
-					}
-				    });
-				short count = 0;
-				while(!cancel) {
-				    Toolkit.getDefaultToolkit().beep();
-				    try { thisObject.wait((count%3!=1)?500:250); }
-				    catch(InterruptedException e) {
-					e.printStackTrace();
-				    }
-				    ++count;
-				}
-			    }
-			    cancel = false;
-			}
-			//setAllEnabled(true);
-			return null;
-		    }
-		};
-	    sw.start();
-	    //setAllEnabled(true);
-	}
-	else {
-	    startMode = true;
-	    mainPanel.setControlButtonText("Start");
-	    synchronized(thisObject) {
-		cancel = true;
-		thisObject.notifyAll();
-	    }
-	    setAllEnabled(true);
-	    mainPanel.setStatusLabelText("Timer stopped");
-	}
+    private class SimpleStopwatchController
+            implements SimpleStopwatchPanel.Controller, StoppableController
+    {
+        private boolean cancel;
+        private boolean startMode;
+
+        public SimpleStopwatchController() {
+            cancel = false;
+            startMode = true;
+        }
+
+        public void startStopButtonActionPerformed(final SimpleStopwatchPanel p)
+        {
+            final Object syncObject = this;
+            final boolean isStart;
+
+            synchronized(syncObject) {
+                if(startMode) {
+                    isStart = true;
+                    startMode = false;
+                }
+                else {
+                    isStart = false;
+                }
+            }
+
+            if(isStart) {
+                final long startTime = System.currentTimeMillis();
+
+                p.setRunning(true);
+
+                SwingWorker sw = new SwingWorker() {
+                    private void reportTime(long tenthsOfSeconds,
+                            boolean updateTitle)
+                    {
+                        final long seconds = tenthsOfSeconds / 10;
+
+                        if(updateTitle) {
+                            setTitle("SimpleTimer (" + seconds + " " +
+                                    "seconds)");
+                        }
+
+                        p.setTimeLabelText(seconds + "." +
+                                (tenthsOfSeconds % 10) + " seconds");
+                    }
+
+                    public Object construct() {
+                        long currentTime = startTime;
+                        long oldTenthsOfSeconds = -1;
+                        long oldSeconds = -1;
+
+                        synchronized(syncObject) {
+                            while(!cancel) {
+                                final long tenthsOfSeconds =
+                                        (currentTime - startTime) / 100;
+                                final long seconds =
+                                        tenthsOfSeconds / 10;
+
+                                if(tenthsOfSeconds != oldTenthsOfSeconds) {
+                                    final boolean updateTitle =
+                                            seconds != oldSeconds;
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                        public void run() {
+                                            reportTime(tenthsOfSeconds,
+                                                    updateTitle);
+                                        }
+                                    });
+
+                                    oldTenthsOfSeconds = tenthsOfSeconds;
+                                    oldSeconds = seconds;
+                                }
+
+                                try { syncObject.wait(25); }
+                                catch(Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                currentTime = System.currentTimeMillis();
+                            }
+
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    setTitle("SimpleTimer");
+                                }
+                            });
+
+                            p.setRunning(false);
+                            startMode = true;
+
+                            cancel = false;
+                            syncObject.notifyAll();
+                        }
+
+                        return null;
+                    }
+                };
+
+                sw.start();
+            }
+            else {
+                stop();
+            }
+        }
+
+        public void stop() {
+            final Object syncObject = this;
+
+            synchronized(syncObject) {
+                if(!startMode) {
+                    cancel = true;
+                    syncObject.notifyAll();
+
+                    while(cancel) {
+                        try {
+                            syncObject.wait();
+                        }
+                        catch(InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static String secondsToHMSString(long seconds) {

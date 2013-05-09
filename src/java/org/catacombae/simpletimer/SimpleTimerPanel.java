@@ -6,6 +6,7 @@
 
 package org.catacombae.simpletimer;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
@@ -14,9 +15,21 @@ import java.awt.event.ActionListener;
  */
 public class SimpleTimerPanel extends javax.swing.JPanel {
 
+    public static interface Controller {
+        public void startStopConfirmButtonActionPerformed(SimpleTimerPanel p);
+    }
+
     /** Creates new form SimpleTimerPanel3 */
-    public SimpleTimerPanel() {
+    public SimpleTimerPanel(final Controller c) {
         initComponents();
+        if(c != null) {
+            addControlButtonListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    c.startStopConfirmButtonActionPerformed(
+                            SimpleTimerPanel.this);
+                }
+            });
+        }
     }
 
     /** This method is called from within the constructor to
