@@ -1,9 +1,13 @@
 package org.catacombae.simpletimer;
 
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.*;
+import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingUtilities;
 
 public class SimpleTimer extends JFrame {
@@ -98,7 +102,7 @@ public class SimpleTimer extends JFrame {
 	setLocationRelativeTo(null);
     }
     
-    public void setupMenus() {
+    private void setupMenus() {
 	JRadioButtonMenuItem traditionalOption = new JRadioButtonMenuItem("Traditional");
 	traditionalOption.setSelected(true);
 	traditionalOption.addActionListener(new ActionListener() {
@@ -209,10 +213,18 @@ public class SimpleTimer extends JFrame {
 	long hours = minutes / 60;
 	minutes -= hours*60;
 	seconds -= (hours*60*60 + minutes*60);
-	String result;
-	if(hours > 0) result = hours + "h " +  minutes + "m " + seconds + "s";
-	else if(minutes > 0) result = minutes + "m " + seconds + "s";
-	else result = seconds + "s";
+
+        String result;
+        if(hours > 0) {
+            result = hours + "h " +  minutes + "m " + seconds + "s";
+        }
+        else if(minutes > 0) {
+            result = minutes + "m " + seconds + "s";
+        }
+        else {
+            result = seconds + "s";
+        }
+
 	return result;
     }
     
