@@ -13,28 +13,28 @@ import javax.swing.SwingUtilities;
 public class SimpleTimer extends JFrame {
     private boolean cancel, startMode;
     private SimpleTimerPanel mainPanel;
-    
+
     public SimpleTimer() {
 	super("SimpleTimer");
 	cancel = false;
 	startMode = true;
 
         mainPanel = new SimpleTimerPanel();
-        
+
 	mainPanel.addControlButtonListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		    startStopConfirmButtonActionPerformed();
 		}
 	    });
-	
+
 	setupMenus();
-	
+
 	setDefaultCloseOperation(EXIT_ON_CLOSE);
 	getContentPane().add(mainPanel);
 	pack();
 	setLocationRelativeTo(null);
     }
-    
+
     private void setupMenus() {
 	JRadioButtonMenuItem traditionalOption = new JRadioButtonMenuItem("Traditional");
 	traditionalOption.setSelected(true);
@@ -50,26 +50,25 @@ public class SimpleTimer extends JFrame {
 		}
 	    });
 	//JRadioButtonMenuItem ption = new JRadioButtonMenuItem("Traditional");
-	
+
 	ButtonGroup styleOptionGroup = new ButtonGroup();
 	styleOptionGroup.add(traditionalOption);
 	styleOptionGroup.add(fixedTimeOption);
-	
+
 	JMenu optionsMenu = new JMenu("Options");
 	optionsMenu.add(traditionalOption);
 	optionsMenu.add(fixedTimeOption);
 	JMenuBar menuBar = new JMenuBar();
 	menuBar.add(optionsMenu);
 	setJMenuBar(menuBar);
-	
     }
-    
+
     public void setAllEnabled(boolean b) {
 	mainPanel.setHoursFieldEnabled(b);
 	mainPanel.setMinutesFieldEnabled(b);
 	mainPanel.setSecondsFieldEnabled(b);
     }
-    
+
     public void startStopConfirmButtonActionPerformed() {
 	final SimpleTimer thisObject = this;
 	if(startMode) {
@@ -140,7 +139,7 @@ public class SimpleTimer extends JFrame {
 	    mainPanel.setStatusLabelText("Timer stopped");
 	}
     }
-    
+
     private static String secondsToHMSString(long seconds) {
 	long minutes = seconds / 60;
 	long hours = minutes / 60;
@@ -160,7 +159,7 @@ public class SimpleTimer extends JFrame {
 
 	return result;
     }
-    
+
     public static void main(String[] args) {
         if(System.getProperty("os.name").toLowerCase().startsWith("mac os x")) {
             System.setProperty("apple.laf.useScreenMenuBar", "true");

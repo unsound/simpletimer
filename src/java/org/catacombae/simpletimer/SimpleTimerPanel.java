@@ -136,16 +136,16 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
-    
+
     public void addControlButtonListener(ActionListener listener) {
         controlButton.addActionListener(listener);
     }
     public String getHoursFieldText() { return hoursField.getText(); }
     public String getMinutesFieldText() { return minutesField.getText(); }
     public String getSecondsFieldText() { return secondsField.getText(); }
-    
+
     // <setters>
-    
+
     public void setStatusLabelText(String s) { statusLabel.setText(s); }
     public void setHoursFieldText(String s) { hoursField.setText(s); }
     public void setMinutesFieldText(String s) { minutesField.setText(s); }
@@ -156,7 +156,7 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
     public void setSecondsFieldEnabled(boolean b) { secondsField.setEnabled(b); }
     //public void setEnabled(boolean b) { .setEnabled(b); }
     public void setControlButtonEnabled(boolean b) { controlButton.setEnabled(b); }
-    
+
     // </setters>
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
