@@ -162,6 +162,10 @@ public class SimpleTimer extends JFrame {
     }
     
     public static void main(String[] args) {
+        if(System.getProperty("os.name").toLowerCase().startsWith("mac os x")) {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+        }
+
        	try {
 	    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 	    /*
