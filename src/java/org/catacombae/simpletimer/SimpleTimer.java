@@ -52,6 +52,17 @@ public class SimpleTimer extends JFrame {
 
         fileMenu.add(newWindowMenuItem);
 
+        JMenuItem closeWindowMenuItem = new JMenuItem("Close window");
+        closeWindowMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                SimpleTimer.this.dispose();
+            }
+        });
+        closeWindowMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
+        fileMenu.add(closeWindowMenuItem);
+
 	JRadioButtonMenuItem traditionalOption = new JRadioButtonMenuItem("Traditional");
 	traditionalOption.setSelected(true);
 	traditionalOption.addActionListener(new ActionListener() {
