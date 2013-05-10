@@ -215,26 +215,34 @@ public class SimpleTimer extends JFrame {
                                 }
                             });
                             if(!cancel) {
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    public void run() {
-                                        p.setStatusLabelText("Timed out. " +
-                                                "Waiting for user to " +
-                                                "confirm...");
-                                        p.setControlButtonText("Confirm");
-                                    }
-                                });
                                 short count = 0;
                                 while(!cancel) {
-                                    Toolkit.getDefaultToolkit().beep();
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                        public void run() {
+                                            long secondsSinceTimeout =
+                                                    (System.currentTimeMillis() -
+                                                    endTime) / 1000;
+                                            p.setStatusLabelText("Timed out " +
+                                                    "(+" +
+                                                    secondsSinceTimeout + " " +
+                                                    "s). Waiting for " +
+                                                    "user to confirm...");
+                                            p.setControlButtonText("Confirm");
+                                        }
+                                    });
+
+                                    if(count != 1 && count != 4) {
+                                        Toolkit.getDefaultToolkit().beep();
+                                    }
+
                                     try {
-                                        final long waitInterval =
-                                                ((count % 3) != 1) ? 500 : 250;
-                                        syncObject.wait(waitInterval);
+                                        syncObject.wait(250);
                                     }
                                     catch(InterruptedException e) {
                                         e.printStackTrace();
                                     }
-                                    ++count;
+
+                                    count = (short) ((count + 1) % 5);
                                 }
                             }
 
@@ -246,12 +254,11 @@ public class SimpleTimer extends JFrame {
                             cancel = false;
                             syncObject.notifyAll();
                         }
-                        //setAllEnabled(true);
+
                         return null;
                     }
                 };
                 sw.start();
-                //setAllEnabled(true);
             }
             else {
                 stop();
