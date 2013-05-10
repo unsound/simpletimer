@@ -4,6 +4,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -29,6 +31,15 @@ public class SimpleTimer extends JFrame {
 	getContentPane().add(mainPanel);
 	pack();
 	setLocationRelativeTo(null);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if(curController != null) {
+                    curController.stop();
+                }
+            }
+        });
     }
 
     private SimpleTimerPanel createNewSimpleTimerPanel() {
@@ -80,6 +91,10 @@ public class SimpleTimer extends JFrame {
         JMenuItem closeWindowMenuItem = new JMenuItem("Close window");
         closeWindowMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if(curController != null) {
+                    curController.stop();
+                }
+
                 SimpleTimer.this.dispose();
             }
         });
