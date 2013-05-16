@@ -227,6 +227,10 @@ public class SimpleTimer extends JFrame {
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
                                     setTitle("SimpleTimer");
+
+                                    if(MacUtils.isMac()) {
+                                        MacUtils.requestUserAttention(true);
+                                    }
                                 }
                             });
                             if(!cancel) {
