@@ -108,9 +108,7 @@ public class SimpleTimer extends JFrame {
         timerOption.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
                     if(!(mainPanel instanceof SimpleTimerPanel)) {
-                        System.err.println("Switching to timer...");
                         mainPanel = createNewSimpleTimerPanel();
-                        /* Stop whatever the other guy is doing... */
                         getContentPane().removeAll();
                         getContentPane().add(mainPanel);
                         pack();
@@ -125,9 +123,7 @@ public class SimpleTimer extends JFrame {
         stopwatchOption.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
                     if(!(mainPanel instanceof SimpleStopwatchPanel)) {
-                        System.err.println("Switching to stopwatch...");
                         mainPanel = createNewSimpleStopwatchPanel();
-                        /* Stop whatever the other guy is doing... */
                         getContentPane().removeAll();
                         getContentPane().add(mainPanel);
                         pack();
