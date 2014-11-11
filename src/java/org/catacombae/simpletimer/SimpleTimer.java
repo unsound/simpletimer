@@ -75,9 +75,19 @@ public class SimpleTimer extends JFrame {
     }
 
     private void setupMenus() {
+        /* Menus. */
         JMenu fileMenu = new JMenu("File");
+        JMenu optionsMenu = new JMenu("Options");
 
+        /* Items in 'File' menu. */
         JMenuItem newWindowMenuItem = new JMenuItem("New window");
+        JMenuItem closeWindowMenuItem = new JMenuItem("Close window");
+
+        /* Items in 'Options' menu. */
+        JRadioButtonMenuItem timerOption = new JRadioButtonMenuItem("Timer");
+        JRadioButtonMenuItem stopwatchOption =
+                new JRadioButtonMenuItem("Stopwatch");
+
         newWindowMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 (new SimpleTimer()).setVisible(true);
@@ -88,7 +98,6 @@ public class SimpleTimer extends JFrame {
 
         fileMenu.add(newWindowMenuItem);
 
-        JMenuItem closeWindowMenuItem = new JMenuItem("Close window");
         closeWindowMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if(curController != null) {
@@ -103,7 +112,6 @@ public class SimpleTimer extends JFrame {
 
         fileMenu.add(closeWindowMenuItem);
 
-        JRadioButtonMenuItem timerOption = new JRadioButtonMenuItem("Timer");
         timerOption.setSelected(true);
         timerOption.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
@@ -118,8 +126,6 @@ public class SimpleTimer extends JFrame {
         timerOption.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
                 Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-        JRadioButtonMenuItem stopwatchOption =
-                new JRadioButtonMenuItem("Stopwatch");
         stopwatchOption.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
                     if(!(mainPanel instanceof SimpleStopwatchPanel)) {
@@ -137,7 +143,6 @@ public class SimpleTimer extends JFrame {
         styleOptionGroup.add(timerOption);
         styleOptionGroup.add(stopwatchOption);
 
-	JMenu optionsMenu = new JMenu("Options");
         optionsMenu.add(timerOption);
         optionsMenu.add(stopwatchOption);
 
