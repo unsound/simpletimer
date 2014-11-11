@@ -6,11 +6,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
@@ -78,15 +81,59 @@ public class SimpleTimer extends JFrame {
         /* Menus. */
         JMenu fileMenu = new JMenu("File");
         JMenu optionsMenu = new JMenu("Options");
+        final JMenu savedMenu = new JMenu("Saved");
 
         /* Items in 'File' menu. */
         JMenuItem newWindowMenuItem = new JMenuItem("New window");
         JMenuItem closeWindowMenuItem = new JMenuItem("Close window");
+        JMenuItem saveTimerItem = new JMenuItem("Save timer");
+        final JMenu deleteSavedTimerMenu = new JMenu("Delete saved timer");
 
         /* Items in 'Options' menu. */
         JRadioButtonMenuItem timerOption = new JRadioButtonMenuItem("Timer");
         JRadioButtonMenuItem stopwatchOption =
                 new JRadioButtonMenuItem("Stopwatch");
+
+        final ActionListener savedMenuItemActionListener = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object source = e.getSource();
+                if(source instanceof JMenuItem) {
+                    try {
+                        loadSavedTimer(((JMenuItem) source).getText());
+                    } catch(BackingStoreException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                else {
+                    throw new RuntimeException("Unexpected source for menu " +
+                            "event: " + source);
+                }
+            }
+        };
+
+        final ActionListener deleteSavedTimerMenuItemActionListener =
+            new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e) {
+                Object source = e.getSource();
+                if(source instanceof JMenuItem) {
+                    try {
+                        deleteSavedTimer(((JMenuItem) source).getText());
+                        setupSavedTimersMenu(savedMenu,
+                                savedMenuItemActionListener);
+                        setupSavedTimersMenu(deleteSavedTimerMenu, this);
+                    } catch(BackingStoreException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                else {
+                    throw new RuntimeException("Unexpected source for menu " +
+                            "event: " + source);
+                }
+            }
+        };
 
         newWindowMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -111,6 +158,36 @@ public class SimpleTimer extends JFrame {
                 Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
         fileMenu.add(closeWindowMenuItem);
+
+        saveTimerItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if(!(mainPanel instanceof SimpleTimerPanel)) {
+                    return;
+                }
+
+                String name = JOptionPane.showInputDialog(SimpleTimer.this,
+                        "Please enter the name of the saved timer",
+                        "Timer name", JOptionPane.PLAIN_MESSAGE);
+                if(name != null) {
+                    try {
+                        saveTimer(name, (SimpleTimerPanel) mainPanel);
+                        setupSavedTimersMenu(savedMenu,
+                                savedMenuItemActionListener);
+                        setupSavedTimersMenu(deleteSavedTimerMenu,
+                                deleteSavedTimerMenuItemActionListener);
+                    } catch(BackingStoreException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+
+        fileMenu.add(saveTimerItem);
+
+        setupSavedTimersMenu(deleteSavedTimerMenu,
+                deleteSavedTimerMenuItemActionListener);
+
+        fileMenu.add(deleteSavedTimerMenu);
 
         timerOption.setSelected(true);
         timerOption.addActionListener(new ActionListener() {
@@ -146,9 +223,12 @@ public class SimpleTimer extends JFrame {
         optionsMenu.add(timerOption);
         optionsMenu.add(stopwatchOption);
 
+        setupSavedTimersMenu(savedMenu, savedMenuItemActionListener);
+
 	JMenuBar menuBar = new JMenuBar();
         menuBar.add(fileMenu);
         menuBar.add(optionsMenu);
+        menuBar.add(savedMenu);
 	setJMenuBar(menuBar);
     }
 
@@ -449,6 +529,115 @@ public class SimpleTimer extends JFrame {
         }
 
 	return result;
+    }
+
+
+    private static Preferences lookupTimersNode(boolean createNodesIfMissing)
+            throws BackingStoreException
+    {
+        Preferences p = Preferences.userNodeForPackage(SimpleTimer.class);
+
+        /* Look up the 'saved' node. */
+        if(!createNodesIfMissing && !p.nodeExists("saved")) {
+            return null;
+        }
+
+        p = p.node("saved");
+
+        /* Look up the 'timers' node. */
+        if(!createNodesIfMissing && !p.nodeExists("timers")) {
+            return null;
+        }
+
+        return p.node("timers");
+    }
+
+    private static void setupSavedTimersMenu(JMenu savedMenu, ActionListener al)
+    {
+        savedMenu.removeAll();
+
+        try {
+            Preferences p = lookupTimersNode(false);
+            if(p == null) {
+                return;
+            }
+
+            /* Populate the menu with the names of the saved timers. */
+            for(String s : p.childrenNames()) {
+                JMenuItem curItem = new JMenuItem(s);
+                curItem.addActionListener(al);
+                savedMenu.add(curItem);
+            }
+        } catch(BackingStoreException bse) {
+            bse.printStackTrace();
+        }
+    }
+
+    private void loadSavedTimer(String name) throws BackingStoreException {
+        Preferences p = Preferences.userNodeForPackage(SimpleTimer.class);
+
+        /* Look up the 'saved' node. */
+        if(!p.nodeExists("saved")) {
+            throw new RuntimeException("No 'saved' node in package user node.");
+        }
+
+        p = p.node("saved");
+
+        /* Look up the 'timers' node. */
+        if(!p.nodeExists("timers")) {
+            throw new RuntimeException("No 'timers' node in 'saved' node.");
+        }
+
+        p = p.node("timers");
+
+        /* Look up the named node that we are attempting to load. */
+        if(!p.nodeExists(name)) {
+            throw new RuntimeException("No '" + name + "' node in 'timers' " +
+                    "node.");
+        }
+
+        p = p.node(name);
+
+        /* Create new timer with default data from the named node. */
+        SimpleTimer newTimer = new SimpleTimer();
+        SimpleTimerPanel panel = (SimpleTimerPanel) newTimer.mainPanel;
+        panel.setHoursFieldText("" + p.getLong("hours", 0));
+        panel.setMinutesFieldText("" + p.getLong("minutes", 0));
+        panel.setSecondsFieldText("" + p.getLong("seconds", 0));
+        panel.setDescriptionAreaText(p.get("description", ""));
+        newTimer.setVisible(true);
+    }
+
+    private static void saveTimer(String name, SimpleTimerPanel panel)
+            throws BackingStoreException
+    {
+        Preferences p = lookupTimersNode(true);
+
+        /* Get or create the named node. */
+        p = p.node(name);
+
+        p.putLong("hours", Long.parseLong(panel.getHoursFieldText()));
+        p.putLong("minutes", Long.parseLong(panel.getMinutesFieldText()));
+        p.putLong("seconds", Long.parseLong(panel.getSecondsFieldText()));
+        p.put("description", panel.getDescriptionAreaText());
+        p.flush();
+    }
+
+    private static void deleteSavedTimer(String name)
+            throws BackingStoreException
+    {
+        Preferences p = lookupTimersNode(false);
+
+        if(p != null && p.nodeExists(name)) {
+            p = p.node(name);
+
+            p.removeNode();
+            p.flush();
+        }
+        else {
+            throw new RuntimeException("Unexpected: Node '" + name + "' " +
+                    "disappeared behind our backs.");
+        }
     }
 
     public static void main(String[] args) {

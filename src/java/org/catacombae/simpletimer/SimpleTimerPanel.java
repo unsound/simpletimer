@@ -45,7 +45,7 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
         controlButtonPanel = new javax.swing.JPanel();
         controlButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        descriptionArea = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
@@ -64,11 +64,11 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
         controlButton.setText("Start");
         controlButtonPanel.add(controlButton);
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setLineWrap(true);
-        jTextArea1.setRows(5);
-        jTextArea1.setWrapStyleWord(true);
-        jScrollPane1.setViewportView(jTextArea1);
+        descriptionArea.setColumns(20);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setRows(5);
+        descriptionArea.setWrapStyleWord(true);
+        jScrollPane1.setViewportView(descriptionArea);
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
@@ -156,6 +156,7 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
     public String getHoursFieldText() { return hoursField.getText(); }
     public String getMinutesFieldText() { return minutesField.getText(); }
     public String getSecondsFieldText() { return secondsField.getText(); }
+    public String getDescriptionAreaText() { return descriptionArea.getText(); }
 
     // <setters>
 
@@ -163,6 +164,7 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
     public void setHoursFieldText(String s) { hoursField.setText(s); }
     public void setMinutesFieldText(String s) { minutesField.setText(s); }
     public void setSecondsFieldText(String s) { secondsField.setText(s); }
+    public void setDescriptionAreaText(String s) { descriptionArea.setText(s); }
     public void setControlButtonText(String s) { controlButton.setText(s); }
     public void setHoursFieldEnabled(boolean b) { hoursField.setEnabled(b); }
     public void setMinutesFieldEnabled(boolean b) { minutesField.setEnabled(b); }
@@ -175,13 +177,13 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton controlButton;
     private javax.swing.JPanel controlButtonPanel;
+    private javax.swing.JTextArea descriptionArea;
     private javax.swing.JTextField hoursField;
     private javax.swing.JLabel hoursLabel;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField minutesField;
     private javax.swing.JLabel minutesLabel;
     private javax.swing.JTextField secondsField;
