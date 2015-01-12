@@ -290,9 +290,8 @@ public class SimpleTimer extends JFrame {
                     private void reportTime(long secondsLeft) {
                         setTitle("SimpleTimer (" + secondsLeft + " seconds " +
                                 "left)");
-                        p.setStatusLabelText("SimpleTimer (" +
-                                secondsToHMSString(secondsLeft) + " " +
-                                "left)");
+                        p.setStatusLabelText(secondsToHMSString(secondsLeft) +
+                                " remaining.");
                     }
 
                     public Object construct() {
