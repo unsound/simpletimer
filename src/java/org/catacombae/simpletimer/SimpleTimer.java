@@ -259,6 +259,17 @@ public class SimpleTimer extends JFrame {
             final Object syncObject = this;
             final boolean isStart;
 
+            final String hoursFieldText = p.getHoursFieldText().trim();
+            final String minutesFieldText = p.getMinutesFieldText().trim();
+            final String secondsFieldText = p.getSecondsFieldText().trim();
+
+            final int hours = hoursFieldText.isEmpty() ? 0 :
+                Integer.parseInt(hoursFieldText);
+            final int minutes = minutesFieldText.isEmpty() ? 0 :
+                Integer.parseInt(minutesFieldText);
+            final int seconds = secondsFieldText.isEmpty() ? 0 :
+                Integer.parseInt(secondsFieldText);
+
             synchronized(syncObject) {
                 if(startMode) {
                     isStart = true;
@@ -273,10 +284,8 @@ public class SimpleTimer extends JFrame {
                 p.setControlButtonText("Stop");
                 setAllEnabled(p, false);
                 final long startTime = System.currentTimeMillis();
-                final long endTime = startTime + 1000 * (
-                        Integer.parseInt(p.getHoursFieldText()) * 3600 +
-                        Integer.parseInt(p.getMinutesFieldText()) * 60 +
-                        Integer.parseInt(p.getSecondsFieldText()));
+                final long endTime = startTime +
+                        1000 * (hours * 3600 + minutes * 60 + seconds);
                 SwingWorker sw = new SwingWorker() {
                     private void reportTime(long secondsLeft) {
                         setTitle("SimpleTimer (" + secondsLeft + " seconds " +
