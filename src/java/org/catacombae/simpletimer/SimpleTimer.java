@@ -532,13 +532,14 @@ public class SimpleTimer extends JFrame {
 
         String result;
         if(hours > 0) {
-            result = hours + "h " +  minutes + "m " + seconds + "s";
+            result = hours + " hours " +  minutes + " minutes " + seconds +
+                    " seconds";
         }
         else if(minutes > 0) {
-            result = minutes + "m " + seconds + "s";
+            result = minutes + " minutes " + seconds + " seconds";
         }
         else {
-            result = seconds + "s";
+            result = seconds + " seconds";
         }
 
 	return result;
