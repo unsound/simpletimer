@@ -291,7 +291,7 @@ public class SimpleTimer extends JFrame {
                         setTitle("SimpleTimer (" + secondsLeft + " seconds " +
                                 "left)");
                         p.setStatusLabelText("SimpleTimer (" +
-                                secondsToHMSString(secondsLeft) + " seconds " +
+                                secondsToHMSString(secondsLeft) + " " +
                                 "left)");
                     }
 
