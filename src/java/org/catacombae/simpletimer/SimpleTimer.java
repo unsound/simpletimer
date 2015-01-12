@@ -348,7 +348,12 @@ public class SimpleTimer extends JFrame {
 
                             p.setControlButtonText("Start");
                             setAllEnabled(p, true);
-                            p.setStatusLabelText("Timer stopped");
+                            long secondsSinceTimeout =
+                                    (System.currentTimeMillis() - endTime) /
+                                    1000;
+                            p.setStatusLabelText("Timer stopped at " +
+                                    (secondsSinceTimeout >= 0 ? "+" : "") +
+                                    secondsSinceTimeout + " s.");
                             startMode = true;
 
                             cancel = false;

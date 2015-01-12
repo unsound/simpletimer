@@ -57,7 +57,7 @@ public class SimpleTimerPanel extends javax.swing.JPanel {
         hoursLabel = new javax.swing.JLabel();
 
         statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        statusLabel.setText("Timer stopped");
+        statusLabel.setText("Timer stopped.");
 
         controlButtonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 0, 0));
 
