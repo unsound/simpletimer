@@ -323,8 +323,15 @@ public class SimpleTimer extends JFrame {
                                 }
                             });
                             if(!cancel) {
+                                final long startTime =
+                                        System.currentTimeMillis();
+                                long curRunStartTime = startTime;
                                 short count = 0;
                                 while(!cancel) {
+                                    final long curStartTime =
+                                            curRunStartTime + count * 250;
+                                    final long curEndTime = curStartTime + 250;
+
                                     SwingUtilities.invokeLater(new Runnable() {
                                         public void run() {
                                             long secondsSinceTimeout =
@@ -344,13 +351,21 @@ public class SimpleTimer extends JFrame {
                                     }
 
                                     try {
-                                        syncObject.wait(250);
+                                        while(System.currentTimeMillis() <
+                                                curEndTime)
+                                        {
+                                            syncObject.wait(10);
+                                        }
                                     }
                                     catch(InterruptedException e) {
                                         e.printStackTrace();
                                     }
 
                                     count = (short) ((count + 1) % 5);
+
+                                    if(count == 0) {
+                                        curRunStartTime += 250 * 5;
+                                    }
                                 }
                             }
 
